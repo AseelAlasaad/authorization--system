@@ -80,6 +80,8 @@ For add role for user
 4. /auth/assign/:userId/:roleId
 Ask user to add token before for authontication 
 5. /search
+Get the current authenticated user's information.
+6./auth/users/me
 ```
 
 ## To generate a service and a module in NestJS using the CLI, use these commands:

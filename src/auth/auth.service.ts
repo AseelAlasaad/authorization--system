@@ -123,4 +123,22 @@ async addPermissionsToRole(roleId: number, permissions: string[]) {
     };
 }
 
+// Get the current authenticated user's information.
+async getCurrentUser(userId: number) {
+    const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+    });
+
+    if (!user) {
+        throw new HttpException({
+            status: HttpStatus.NOT_FOUND,
+            error: 'User not found',
+        }, HttpStatus.NOT_FOUND);
+    }
+
+    return {
+        data: user,
+        message: 'User retrieved successfully',
+    };
+}
 }

@@ -1,5 +1,6 @@
-import { Controller, Post, Body, HttpException, Param} from '@nestjs/common';
+import { Controller, Post, Body, HttpException, Param, UseGuards, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from 'src/utils/guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -44,5 +45,11 @@ export class AuthController {
     @Body('permissions') permissions: string[]
   ) {
     return this.authService.addPermissionsToRole(roleId, permissions);
+  }
+
+  @Get('users/me')
+  @UseGuards(JwtAuthGuard)
+  getCurrentUser(@Req() req) {
+      return this.authService.getCurrentUser(req.user.id);
   }
 }
