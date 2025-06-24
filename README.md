@@ -79,3 +79,12 @@ For add permissions for each role
 For add role for user
 4. /auth/assign/:userId/:roleId
 ```
+
+## To generate a service and a module in NestJS using the CLI, use these commands:
+```bash
+
+# Install Prisma CLI and dependencies
+nest g mo <module-name>
+nest g s <service-name>
+nest g co product
+```
