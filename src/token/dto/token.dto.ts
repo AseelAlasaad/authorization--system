@@ -9,5 +9,6 @@ export class CreateTokenDto {
     @IsNotEmpty()
     user_id: number;
     expiry_date: Date;
+    
 }
 

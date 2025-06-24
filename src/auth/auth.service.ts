@@ -71,4 +71,56 @@ export class AuthService {
 
         return user;
     }
+    async assignRoleToUser(userId: number, roleId: number) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+
+        if (!user) {
+            throw new HttpException({
+                status: HttpStatus.NOT_FOUND,
+                error: 'User not found',
+            }, HttpStatus.NOT_FOUND);
+        }
+
+        const updatedUser = await this.prisma.user.update({
+            where: { id: userId },
+            data: { roleId },
+        });
+
+        return {
+            data: updatedUser,
+            message: 'Role assigned successfully',
+        };
+    }
+async addPermissionsToRole(roleId: number, permissions: string[]) {
+    const role = await this.prisma.role.findUnique({
+        where: { id: roleId },
+    });
+
+    if (!role) {
+        throw new HttpException({
+            status: HttpStatus.NOT_FOUND,
+            error: 'Role not found',
+        }, HttpStatus.NOT_FOUND);
+    }
+
+    const updatedRole = await this.prisma.role.update({
+        where: { id: roleId },
+        data: {
+            permissions: {
+                connectOrCreate: permissions.map(action => ({
+                    where: { action }, // assumes `action` is unique in schema
+                    create: { action }
+                }))
+            }
+        }
+    });
+
+    return {
+        data: updatedRole,
+        message: 'Permissions added to role successfully',
+    };
+}
+
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpException} from '@nestjs/common';
+import { Controller, Post, Body, HttpException, Param} from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -28,4 +28,21 @@ export class AuthController {
             }, 401);
         }
     }
+    @Post('assign/:userId/:roleId')
+
+  assignRoleToUser(
+    @Param('userId') userId: number,
+    @Param('roleId') roleId: number
+  ) {
+    return this.authService.assignRoleToUser(userId, roleId);
+  }
+
+  // Add permissions to role
+  @Post('permissions/:roleId')
+  addPermissionsToRole(
+    @Param('roleId') roleId: number,
+    @Body('permissions') permissions: string[]
+  ) {
+    return this.authService.addPermissionsToRole(roleId, permissions);
+  }
 }
