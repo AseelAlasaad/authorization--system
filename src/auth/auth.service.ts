@@ -1,18 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpCode, HttpException } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { TokenService } from 'src/token/token.service';
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaClient) {}
+    constructor(private prisma: PrismaClient, private tokenService: TokenService) {}
 
     // register a new user
     async register(username:string,email: string, password: string) {
-        const existingUser = await this.prisma.user.findUnique({
+         try {
+                    const existingUser = await this.prisma.user.findUnique({
             where: { email },
         });
 
         if (existingUser) {
-            throw new Error('User already exists');
+            throw new HttpException({
+                status: 400,
+                error: 'User with this email already exists',
+            }, 400);
         }
 
         // hash the password before saving it
@@ -24,9 +29,21 @@ export class AuthService {
                hashedPassword,
             },
         });
-        // generate a JWT token
-
-        return user;
+        const tokenData = await this.tokenService.generateToken(user.id, this.prisma, user.email);
+        return {
+            data:{
+                ...user,
+                token: tokenData
+            },
+            message: 'User registered successfully',
+        }
+         } catch (error) {
+            throw new HttpException({
+                status: 400,
+                error: error.message || 'Registration failed',
+            }, 400);
+         }
+      
     }
 
     // login a user
