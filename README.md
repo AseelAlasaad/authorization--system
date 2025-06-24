@@ -78,6 +78,8 @@ For add permissions for each role
 3. /auth/roles/permissions/:roleId
 For add role for user
 4. /auth/assign/:userId/:roleId
+Ask user to add token before for authontication 
+5. /search
 ```
 
 ## To generate a service and a module in NestJS using the CLI, use these commands:
