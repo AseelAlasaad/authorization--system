@@ -2,13 +2,12 @@
 import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class CreateTokenDto {
-    @IsNotEmpty()
-    @IsString()
-    token_data: string;
+     @IsString()
+    @IsOptional()
+    token_data?: string;
 
     @IsNotEmpty()
     user_id: number;
-    @IsOptional()
-    expiry_date?: Date;
+    expiry_date: Date;
 }
 

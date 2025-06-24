@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import * as dayjs from 'dayjs'
 import { CreateTokenDto } from './dto/token.dto';
-import { Prisma } from 'generated/prisma';
 import { Token } from './entities/token.entity';
+import { PrismaService } from 'nestjs-prisma';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class TokenService {
-    constructor(private prisma: PrismaClient,
+    constructor(private prisma: PrismaService,
         private jwtService: JwtService) { }
 
     // Create a new token
     async createToken(createTokenDto: CreateTokenDto,
         prisma: Prisma.TransactionClient
     ): Promise<Token> {
-        const token = await this.prisma.token.create({
+        const token = await prisma.token.create({
             data: {
                 ...createTokenDto
             },
@@ -23,16 +23,16 @@ export class TokenService {
         return token;
     }
     // Generate a JWT token
-    JWTSign(
-        payload: { email: string, token_id: number },
-        expiry?: string
+  JWTSign(
+        payload: {email:string, token_id:number},
+        expiry:string
+    ){
+        const token= this.jwtService.sign(payload, {
+            secret: process.env.SECRET,
+            
+            expiresIn:expiry})
+        return token
 
-    ) {
-        const token = this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-            expiresIn: expiry
-        });
-        return token;
     }
 
     async createAccessToken(
@@ -42,7 +42,6 @@ export class TokenService {
         const tokenData = await this.createToken(
             {
                 user_id: userId,
-                token_data: this.JWTSign({ email: userId.toString(), token_id: userId }),
                 expiry_date: dayjs().add(1, 'hour').toDate()
             },
             prisma
@@ -51,7 +50,7 @@ export class TokenService {
     }
     // Validate a token
     async validateToken({ token_id, email }: { token_id: number, email: string }) {
-        const token = await this.prisma.token.findUnique({
+        const token = await this.prisma.token.findFirst({
             where: {
                 id: token_id,
                 expiry_date: dayjs().add(1, 'hour').toDate(),

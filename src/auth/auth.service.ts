@@ -1,10 +1,10 @@
-import { Injectable, HttpCode, HttpException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Injectable, HttpCode, HttpException, HttpStatus } from '@nestjs/common';
+import { PrismaService } from 'nestjs-prisma';
 import * as bcrypt from 'bcryptjs';
 import { TokenService } from 'src/token/token.service';
 @Injectable()
 export class AuthService {
-    constructor(private prisma: PrismaClient, private tokenService: TokenService) {}
+    constructor(private  prisma: PrismaService, private tokenService: TokenService) {}
 
     // register a new user
     async register(username:string,email: string, password: string) {
@@ -26,7 +26,7 @@ export class AuthService {
             data: {
                 username,
                 email,
-               hashedPassword,
+               password: hashedPassword,
             },
         });
         const tokenData = await this.tokenService.generateToken(user.id, this.prisma, user.email);
@@ -53,13 +53,20 @@ export class AuthService {
         });
 
         if (!user) {
-            throw new Error('User not found');
+            throw new HttpException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'Invalid credentials',
+            }, HttpStatus.UNAUTHORIZED);
         }
 
         // compare the hashed password with the provided password
-        const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
         if (!isPasswordValid) {
-            throw new Error('Invalid password');
+            throw new HttpException({
+                status: HttpStatus.UNAUTHORIZED,
+                error: 'Invalid credentials',
+            }, HttpStatus.UNAUTHORIZED);
         }
 
         return user;
